@@ -12,6 +12,7 @@ export default function HomePage() {
   const [showForm, setShowForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [focusedCityId, setFocusedCityId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function HomePage() {
 
       addCity(newCity);
       refreshCities();
+      setFocusedCityId(newCity.id);
       setShowForm(false);
     } catch (error) {
       if (error instanceof Error) {
@@ -62,6 +64,7 @@ export default function HomePage() {
       );
 
       if (existingCity) {
+        setFocusedCityId(existingCity.id);
         navigate(`/city/${existingCity.id}`);
         return;
       }
@@ -78,6 +81,7 @@ export default function HomePage() {
 
       addCity(newCity);
       refreshCities();
+      setFocusedCityId(newCity.id);
       navigate(`/city/${newCity.id}`);
     } catch (error) {
       console.error(error);
@@ -87,9 +91,18 @@ export default function HomePage() {
   function handleDeleteCity(id: string) {
     deleteCity(id);
     refreshCities();
+
+    if (focusedCityId === id) {
+      setFocusedCityId(null);
+    }
   }
 
-  function handleSelectCity(id: string) {
+  function handleFocusCity(id: string) {
+    setFocusedCityId(id);
+  }
+
+  function handleOpenCity(id: string) {
+    setFocusedCityId(id);
     navigate(`/city/${id}`);
   }
 
@@ -112,7 +125,8 @@ export default function HomePage() {
                 setFormError("");
               }}
               onDeleteCity={handleDeleteCity}
-              onSelectCity={handleSelectCity}
+              onFocusCity={handleFocusCity}
+              onOpenCity={handleOpenCity}
             />
           </div>
 
@@ -130,11 +144,12 @@ export default function HomePage() {
         </div>
 
         <div className="h-[600px]">
-        <MapView
-          cities={cities}
-          onMapClick={handleMapAddCity}
-          onSelectCity={handleSelectCity}
-        />
+          <MapView
+            cities={cities}
+            focusedCityId={focusedCityId}
+            onMapClick={handleMapAddCity}
+            onSelectCity={handleOpenCity}
+          />
         </div>
       </div>
     </div>

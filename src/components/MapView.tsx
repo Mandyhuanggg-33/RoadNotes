@@ -1,23 +1,29 @@
-import { useMemo, useState } from "react";
-import Map, { Marker, Popup } from "react-map-gl/mapbox";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Map, { Marker, Popup, type MapRef } from "react-map-gl/mapbox";
 import type { CityEntry } from "../types/city";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 type MapViewProps = {
   cities?: CityEntry[];
+  focusedCityId?: string | null;
   onMapClick?: (lat: number, lng: number) => void;
   onSelectCity?: (id: string) => void;
 };
 
 export default function MapView({
   cities = [],
+  focusedCityId = null,
   onMapClick,
   onSelectCity,
 }: MapViewProps) {
+  const mapRef = useRef<MapRef | null>(null);
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
   const selectedCity =
     cities.find((city) => city.id === selectedCityId) || null;
+
+  const focusedCity =
+    cities.find((city) => city.id === focusedCityId) || null;
 
   const initialViewState = useMemo(() => {
     if (cities.length > 0) {
@@ -34,6 +40,16 @@ export default function MapView({
       zoom: 3,
     };
   }, [cities]);
+
+  useEffect(() => {
+    if (!focusedCity || !mapRef.current) return;
+
+    mapRef.current.flyTo({
+      center: [focusedCity.lng, focusedCity.lat],
+      zoom: 8,
+      duration: 1500,
+    });
+  }, [focusedCity]);
 
   const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
@@ -53,31 +69,38 @@ export default function MapView({
   return (
     <div className="h-full overflow-hidden rounded-2xl border shadow-sm">
       <Map
+        ref={mapRef}
         mapboxAccessToken={mapboxToken}
         initialViewState={initialViewState}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         style={{ width: "100%", height: "100%" }}
         onClick={handleMapClick}
       >
-        {cities.map((city) => (
-          <Marker
-            key={city.id}
-            longitude={city.lng}
-            latitude={city.lat}
-            anchor="bottom"
-          >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedCityId(city.id);
-                onSelectCity?.(city.id);
-              }}
-              className="h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow"
-              aria-label={`View ${city.name}`}
-            />
-          </Marker>
-        ))}
+        {cities.map((city) => {
+          const isFocused = city.id === focusedCityId;
+
+          return (
+            <Marker
+              key={city.id}
+              longitude={city.lng}
+              latitude={city.lat}
+              anchor="bottom"
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedCityId(city.id);
+                  onSelectCity?.(city.id);
+                }}
+                className={`rounded-full border-2 border-white shadow transition ${
+                  isFocused ? "h-6 w-6 bg-blue-600" : "h-4 w-4 bg-red-500"
+                }`}
+                aria-label={`View ${city.name}`}
+              />
+            </Marker>
+          );
+        })}
 
         {selectedCity && (
           <Popup
