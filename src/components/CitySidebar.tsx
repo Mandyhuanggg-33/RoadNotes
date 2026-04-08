@@ -3,11 +3,13 @@ import type { CityEntry } from "../types/city";
 type CitySidebarProps = {
   cities: CityEntry[];
   onAddCity: () => void;
+  onDeleteCity: (id: string) => void;
 };
 
 export default function CitySidebar({
   cities,
   onAddCity,
+  onDeleteCity,
 }: CitySidebarProps) {
   return (
     <aside className="h-full rounded-2xl border bg-white p-4 shadow-sm">
@@ -34,12 +36,26 @@ export default function CitySidebar({
       ) : (
         <div className="space-y-3">
           {cities.map((city) => (
-            <button
-            key={city.id}
-            className="w-full rounded-xl border px-4 py-3 text-left transition hover:bg-gray-50"
-          >
-            <p className="font-medium">{city.name}</p>
-          </button>
+            <div
+              key={city.id}
+              className="rounded-xl border px-4 py-3 transition hover:bg-gray-50"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-medium">{city.name}</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {city.lat.toFixed(4)}, {city.lng.toFixed(4)}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => onDeleteCity(city.id)}
+                  className="rounded-lg border px-3 py-1 text-sm text-red-600 transition hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       )}

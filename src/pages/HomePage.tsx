@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import CitySidebar from "../components/CitySidebar";
 import MapView from "../components/MapView";
 import AddCityForm from "../components/AddCityForm";
-import { addCity, getCities } from "../lib/storage";
+import { addCity, deleteCity, getCities } from "../lib/storage";
 import { geocodeCity } from "../lib/geocoding";
 import type { CityEntry } from "../types/city";
 
@@ -51,6 +51,11 @@ export default function HomePage() {
     }
   }
 
+  function handleDeleteCity(id: string) {
+    deleteCity(id);
+    refreshCities();
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mb-6">
@@ -69,6 +74,7 @@ export default function HomePage() {
                 setShowForm((prev) => !prev);
                 setFormError("");
               }}
+              onDeleteCity={handleDeleteCity}
             />
           </div>
 
@@ -86,7 +92,7 @@ export default function HomePage() {
         </div>
 
         <div className="h-[600px]">
-          <MapView />
+        <MapView cities={cities} />
         </div>
       </div>
     </div>
