@@ -5,9 +5,13 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 type MapViewProps = {
   cities?: CityEntry[];
+  onMapClick?: (lat: number, lng: number) => void;
 };
 
-export default function MapView({ cities = [] }: MapViewProps) {
+export default function MapView({
+  cities = [],
+  onMapClick,
+}: MapViewProps) {
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
   const selectedCity =
@@ -39,6 +43,11 @@ export default function MapView({ cities = [] }: MapViewProps) {
     );
   }
 
+  function handleMapClick(event: { lngLat: { lat: number; lng: number } }) {
+    const { lat, lng } = event.lngLat;
+    onMapClick?.(lat, lng);
+  }
+
   return (
     <div className="h-full overflow-hidden rounded-2xl border shadow-sm">
       <Map
@@ -46,6 +55,7 @@ export default function MapView({ cities = [] }: MapViewProps) {
         initialViewState={initialViewState}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         style={{ width: "100%", height: "100%" }}
+        onClick={handleMapClick}
       >
         {cities.map((city) => (
           <Marker
@@ -56,7 +66,10 @@ export default function MapView({ cities = [] }: MapViewProps) {
           >
             <button
               type="button"
-              onClick={() => setSelectedCityId(city.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedCityId(city.id);
+              }}
               className="h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow"
               aria-label={`View ${city.name}`}
             />

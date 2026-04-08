@@ -3,7 +3,7 @@ import CitySidebar from "../components/CitySidebar";
 import MapView from "../components/MapView";
 import AddCityForm from "../components/AddCityForm";
 import { addCity, deleteCity, getCities } from "../lib/storage";
-import { geocodeCity } from "../lib/geocoding";
+import { geocodeCity, reverseGeocodeCity } from "../lib/geocoding";
 import type { CityEntry } from "../types/city";
 
 export default function HomePage() {
@@ -51,6 +51,35 @@ export default function HomePage() {
     }
   }
 
+  async function handleMapAddCity(lat: number, lng: number) {
+    try {
+      const result = await reverseGeocodeCity(lat, lng);
+
+      const alreadyExists = cities.some(
+        (city) => city.name.toLowerCase() === result.name.toLowerCase()
+      );
+
+      if (alreadyExists) {
+        return;
+      }
+
+      const newCity: CityEntry = {
+        id: crypto.randomUUID(),
+        name: result.name,
+        lat: result.lat,
+        lng: result.lng,
+        notes: "",
+        images: [],
+        createdAt: new Date().toISOString(),
+      };
+
+      addCity(newCity);
+      refreshCities();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   function handleDeleteCity(id: string) {
     deleteCity(id);
     refreshCities();
@@ -92,7 +121,7 @@ export default function HomePage() {
         </div>
 
         <div className="h-[600px]">
-        <MapView cities={cities} />
+          <MapView cities={cities} onMapClick={handleMapAddCity} />
         </div>
       </div>
     </div>
