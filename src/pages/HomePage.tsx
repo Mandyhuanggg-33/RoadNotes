@@ -148,7 +148,8 @@ export default function HomePage() {
             cities={cities}
             focusedCityId={focusedCityId}
             onMapClick={handleMapAddCity}
-            onSelectCity={handleOpenCity}
+            onFocusCity={handleFocusCity}
+            onOpenCity={handleOpenCity}
           />
         </div>
       </div>
