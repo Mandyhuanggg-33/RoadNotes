@@ -4,12 +4,14 @@ type CitySidebarProps = {
   cities: CityEntry[];
   onAddCity: () => void;
   onDeleteCity: (id: string) => void;
+  onSelectCity: (id: string) => void;
 };
 
 export default function CitySidebar({
   cities,
   onAddCity,
   onDeleteCity,
+  onSelectCity,
 }: CitySidebarProps) {
   return (
     <aside className="h-full rounded-2xl border bg-white p-4 shadow-sm">
@@ -41,12 +43,15 @@ export default function CitySidebar({
               className="rounded-xl border px-4 py-3 transition hover:bg-gray-50"
             >
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <button
+                  onClick={() => onSelectCity(city.id)}
+                  className="flex-1 text-left"
+                >
                   <p className="font-medium">{city.name}</p>
                   <p className="mt-1 text-sm text-gray-500">
                     {city.lat.toFixed(4)}, {city.lng.toFixed(4)}
                   </p>
-                </div>
+                </button>
 
                 <button
                   onClick={() => onDeleteCity(city.id)}

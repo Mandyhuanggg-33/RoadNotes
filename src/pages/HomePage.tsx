@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CitySidebar from "../components/CitySidebar";
 import MapView from "../components/MapView";
 import AddCityForm from "../components/AddCityForm";
@@ -11,6 +12,7 @@ export default function HomePage() {
   const [showForm, setShowForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     setCities(getCities());
@@ -55,11 +57,12 @@ export default function HomePage() {
     try {
       const result = await reverseGeocodeCity(lat, lng);
 
-      const alreadyExists = cities.some(
+      const existingCity = cities.find(
         (city) => city.name.toLowerCase() === result.name.toLowerCase()
       );
 
-      if (alreadyExists) {
+      if (existingCity) {
+        navigate(`/city/${existingCity.id}`);
         return;
       }
 
@@ -75,6 +78,7 @@ export default function HomePage() {
 
       addCity(newCity);
       refreshCities();
+      navigate(`/city/${newCity.id}`);
     } catch (error) {
       console.error(error);
     }
@@ -83,6 +87,10 @@ export default function HomePage() {
   function handleDeleteCity(id: string) {
     deleteCity(id);
     refreshCities();
+  }
+
+  function handleSelectCity(id: string) {
+    navigate(`/city/${id}`);
   }
 
   return (
@@ -104,6 +112,7 @@ export default function HomePage() {
                 setFormError("");
               }}
               onDeleteCity={handleDeleteCity}
+              onSelectCity={handleSelectCity}
             />
           </div>
 
