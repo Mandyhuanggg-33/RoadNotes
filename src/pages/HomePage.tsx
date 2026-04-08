@@ -30,6 +30,16 @@ export default function HomePage() {
 
       const result = await geocodeCity(name);
 
+      const existingCity = cities.find(
+        (city) => city.name.toLowerCase() === result.name.toLowerCase()
+      );
+
+      if (existingCity) {
+        setFocusedCityId(existingCity.id);
+        setShowForm(false);
+        return;
+      }
+
       const newCity: CityEntry = {
         id: crypto.randomUUID(),
         name: result.name,
@@ -65,7 +75,6 @@ export default function HomePage() {
 
       if (existingCity) {
         setFocusedCityId(existingCity.id);
-        navigate(`/city/${existingCity.id}`);
         return;
       }
 
@@ -82,7 +91,6 @@ export default function HomePage() {
       addCity(newCity);
       refreshCities();
       setFocusedCityId(newCity.id);
-      navigate(`/city/${newCity.id}`);
     } catch (error) {
       console.error(error);
     }
