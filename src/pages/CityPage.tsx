@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getCityById, updateCity, deleteCity } from "../lib/storage";
 import type { CityEntry } from "../types/city";
 
 export default function CityPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [city, setCity] = useState<CityEntry | null>(null);
+  const [tripTitle, setTripTitle] = useState("");
+  const [visitDate, setVisitDate] = useState("");
+  const [mood, setMood] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  const [highlight, setHighlight] = useState("");
   const [notes, setNotes] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [savedMessage, setSavedMessage] = useState("");
@@ -16,6 +23,11 @@ export default function CityPage() {
     const foundCity = getCityById(id);
     if (foundCity) {
       setCity(foundCity);
+      setTripTitle(foundCity.tripTitle || "");
+      setVisitDate(foundCity.visitDate || "");
+      setMood(foundCity.mood || "");
+      setTagsInput((foundCity.tags || []).join(", "));
+      setHighlight(foundCity.highlight || "");
       setNotes(foundCity.notes || "");
       setImages(foundCity.images || []);
     }
@@ -26,6 +38,14 @@ export default function CityPage() {
 
     const updatedCity: CityEntry = {
       ...city,
+      tripTitle,
+      visitDate,
+      mood,
+      tags: tagsInput
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      highlight,
       notes,
       images,
     };
@@ -78,7 +98,7 @@ export default function CityPage() {
     if (!confirmed) return;
 
     deleteCity(city.id);
-    window.location.href = "/";
+    navigate("/");
   }
 
   if (!city) {
@@ -116,6 +136,73 @@ export default function CityPage() {
           >
             Delete City
           </button>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Trip Title
+            </label>
+            <input
+              type="text"
+              value={tripTitle}
+              onChange={(e) => setTripTitle(e.target.value)}
+              placeholder="Weekend in Seattle"
+              className="w-full rounded-2xl border p-3 outline-none focus:ring-2 focus:ring-black/10"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Visit Date
+            </label>
+            <input
+              type="date"
+              value={visitDate}
+              onChange={(e) => setVisitDate(e.target.value)}
+              className="w-full rounded-2xl border p-3 outline-none focus:ring-2 focus:ring-black/10"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Mood
+            </label>
+            <input
+              type="text"
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              placeholder="Excited, peaceful, nostalgic..."
+              className="w-full rounded-2xl border p-3 outline-none focus:ring-2 focus:ring-black/10"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Tags
+            </label>
+            <input
+              type="text"
+              value={tagsInput}
+              onChange={(e) => setTagsInput(e.target.value)}
+              placeholder="food, road trip, waterfront"
+              className="w-full rounded-2xl border p-3 outline-none focus:ring-2 focus:ring-black/10"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Favorite Highlight
+          </label>
+          <textarea
+            value={highlight}
+            onChange={(e) => setHighlight(e.target.value)}
+            placeholder="What was the most memorable part of this stop?"
+            className="min-h-[120px] w-full rounded-2xl border p-4 outline-none focus:ring-2 focus:ring-black/10"
+          />
         </div>
 
         <div className="mt-6">
