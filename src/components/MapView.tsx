@@ -6,11 +6,13 @@ import "mapbox-gl/dist/mapbox-gl.css";
 type MapViewProps = {
   cities?: CityEntry[];
   onMapClick?: (lat: number, lng: number) => void;
+  onSelectCity?: (id: string) => void;
 };
 
 export default function MapView({
   cities = [],
   onMapClick,
+  onSelectCity,
 }: MapViewProps) {
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
@@ -69,6 +71,7 @@ export default function MapView({
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedCityId(city.id);
+                onSelectCity?.(city.id);
               }}
               className="h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow"
               aria-label={`View ${city.name}`}

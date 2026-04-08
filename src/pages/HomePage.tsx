@@ -130,7 +130,11 @@ export default function HomePage() {
         </div>
 
         <div className="h-[600px]">
-          <MapView cities={cities} onMapClick={handleMapAddCity} />
+        <MapView
+          cities={cities}
+          onMapClick={handleMapAddCity}
+          onSelectCity={handleSelectCity}
+        />
         </div>
       </div>
     </div>
