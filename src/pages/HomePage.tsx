@@ -1,15 +1,55 @@
 import { useEffect, useState } from "react";
 import CitySidebar from "../components/CitySidebar";
 import MapView from "../components/MapView";
-import { getCities } from "../lib/storage";
+import AddCityForm from "../components/AddCityForm";
+import { addCity, getCities } from "../lib/storage";
+import { geocodeCity } from "../lib/geocoding";
 import type { CityEntry } from "../types/city";
 
 export default function HomePage() {
   const [cities, setCities] = useState<CityEntry[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     setCities(getCities());
   }, []);
+
+  function refreshCities() {
+    setCities(getCities());
+  }
+
+  async function handleSaveCity(name: string) {
+    try {
+      setIsSaving(true);
+      setFormError("");
+
+      const result = await geocodeCity(name);
+
+      const newCity: CityEntry = {
+        id: crypto.randomUUID(),
+        name: result.name,
+        lat: result.lat,
+        lng: result.lng,
+        notes: "",
+        images: [],
+        createdAt: new Date().toISOString(),
+      };
+
+      addCity(newCity);
+      refreshCities();
+      setShowForm(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        setFormError(error.message);
+      } else {
+        setFormError("Something went wrong.");
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -21,8 +61,28 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-        <div className="h-[600px]">
-          <CitySidebar cities={cities} />
+        <div className="space-y-4">
+          <div className="h-[600px]">
+            <CitySidebar
+              cities={cities}
+              onAddCity={() => {
+                setShowForm((prev) => !prev);
+                setFormError("");
+              }}
+            />
+          </div>
+
+          {showForm && (
+            <AddCityForm
+              onSave={handleSaveCity}
+              onCancel={() => {
+                setShowForm(false);
+                setFormError("");
+              }}
+              isSaving={isSaving}
+              error={formError}
+            />
+          )}
         </div>
 
         <div className="h-[600px]">
